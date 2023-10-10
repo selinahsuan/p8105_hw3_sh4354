@@ -5,4 +5,32 @@ date: "2023-10-10"
 output: github_document
 ---
 
+Load libraries
+
+```{r}
+library(tidyverse)
+library(p8105.datasets)
+```
+
+
+## PROBLEM 1
+
+```{r}
+data("instacart")
+```
+
+The dataset `instacart` consists of 15 variables and 1384617 observations. It describes the products ordered through Instacart for several order numbers. 
+
+```{r}
+instacart |> 
+  count(aisle) |> 
+  arrange(desc(n)) |> 
+  drop_na(aisle)
+```
+
+There are 124 aisles. The most items are ordered form fresh vegetales aisle. 
+
+## PROBLEM 2
+
+
 
