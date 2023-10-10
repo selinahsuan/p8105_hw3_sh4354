@@ -32,5 +32,27 @@ There are 124 aisles. The most items are ordered form fresh vegetales aisle.
 
 ## PROBLEM 2
 
+Load BRFSS dataset
+```{r}
+data("brfss_smart2010")
+```
+
+Clean dataset
+```{r}
+brfss_smart2010 |> 
+  janitor::clean_names() |> 
+  filter(topic == "Overall Health") |> 
+  arrange(response) |> 
+  mutate(
+    response = fct_relevel(response, c("Poor", "Fair", "Good", "Very good", "Excellent"))
+  )
+```
+
+
+Question 1
+
+```{r}
+
+```
 
 
