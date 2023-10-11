@@ -5,9 +5,11 @@ date: "2023-10-10"
 output: github_document
 ---
 
-Load libraries
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE, message = FALSE)
+```
 
-```{r}
+```{r load_libraries}
 library(tidyverse)
 library(p8105.datasets)
 ```
@@ -15,7 +17,7 @@ library(p8105.datasets)
 
 ## PROBLEM 1
 
-```{r}
+```{r load_instacart_data}
 data("instacart")
 ```
 
@@ -30,6 +32,43 @@ instacart |>
 
 There are 124 aisles. The most items are ordered form fresh vegetales aisle. 
 
+
+Next, we create a plot showing the number of items ordered in each aisle, limiting this to aisles with more than 10000 items ordered.
+```{r}
+instacart |> 
+  count(aisle) |> 
+  filter(n > 10000) |> 
+  mutate(aisle = fct_reorder(aisle, n)) |> 
+  ggplot(aes(x = aisle, y = n)) + 
+  geom_point() + 
+  labs(title = "Number of items ordered in each aisle") +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))
+```
+
+Now we make a table showing the three most popular items in each of the aisles “baking ingredients”, “dog food care”, and “packaged vegetables fruits."
+```{r}
+instacart |> 
+  filter(aisle %in% c("baking ingredients", "dog food care", "packaged vegetables fruits")) |>
+  group_by(aisle) |> 
+  count(product_name) |> 
+  mutate(rank = min_rank(desc(n))) |> 
+  filter(rank < 4) |> 
+  arrange(desc(n)) |>
+  knitr::kable()
+```
+
+
+Finally, we make a table showing the mean hour of the day at which Pink Lady Apples and Coffee Ice Cream are ordered on each day of the week.
+```{r}
+instacart |>
+  filter(product_name %in% c("Pink Lady Apples", "Coffee Ice Cream")) |>
+  group_by(product_name, order_dow) |>
+  summarize(mean_hour = mean(order_hour_of_day)) |>
+  pivot_wider(
+    names_from = order_dow, 
+    values_from = mean_hour) |>
+  knitr::kable(digits = 2)
+```
 
 
 ## PROBLEM 2
@@ -121,7 +160,7 @@ The 2-panel plot shows the distribution of data values for each reponse from "po
 ## PROBLEM 3
 
 Clean demographic data
-```{r}
+```{r import_demographic}
 demographic_df = 
   read_csv("./data/nhanes_covar.csv", skip = 4, na = ".") |> 
   janitor::clean_names() |> 
