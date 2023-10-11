@@ -1,5 +1,5 @@
 ---
-title: "p8105_hw3_sh4354"
+title: "Homework 3"
 author: "Selina Hsuan"
 date: "2023-10-10"
 output: github_document
@@ -34,6 +34,7 @@ There are 124 aisles. The most items are ordered form fresh vegetales aisle.
 
 
 Next, we create a plot showing the number of items ordered in each aisle, limiting this to aisles with more than 10000 items ordered.
+
 ```{r}
 instacart |> 
   count(aisle) |> 
@@ -46,6 +47,7 @@ instacart |>
 ```
 
 Now we make a table showing the three most popular items in each of the aisles “baking ingredients”, “dog food care”, and “packaged vegetables fruits."
+
 ```{r}
 instacart |> 
   filter(aisle %in% c("baking ingredients", "dog food care", "packaged vegetables fruits")) |>
@@ -59,6 +61,7 @@ instacart |>
 
 
 Finally, we make a table showing the mean hour of the day at which Pink Lady Apples and Coffee Ice Cream are ordered on each day of the week.
+
 ```{r}
 instacart |>
   filter(product_name %in% c("Pink Lady Apples", "Coffee Ice Cream")) |>
@@ -71,14 +74,15 @@ instacart |>
 ```
 
 
+
 ## PROBLEM 2
 
-Load BRFSS dataset
 ```{r}
 data("brfss_smart2010")
 ```
 
-Clean dataset
+First, we do some data cleaning for BRFSS. 
+
 ```{r}
 brfss_df = 
   brfss_smart2010 |> 
@@ -94,32 +98,32 @@ brfss_df =
 ```
 
 
-States observed at 7 or more locations in 2022
+The next code chunk determines which states were observed at 7 or more locations in 2002. 
 
 ```{r}
 brfss_df |> 
   filter(year == 2002) |> 
   group_by(state) |> 
   summarize(n_location = n()) |> 
-  filter(n_location >=7)
+  filter(n_location >=7) |> 
+  knitr::kable()
 ```
 
-In 2002, 36 states were observed at 7 or more locations. 
-
-
-States observed at 7 or more locations in 2010
+Similarly, this code chunk determines which states were observed at 7 or more locations in 2010.
 
 ```{r}
 brfss_df |> 
   filter(year == 2010) |> 
   group_by(state) |> 
   summarize(n_location = n()) |> 
-  filter(n_location >=7)
+  filter(n_location >=7) |> 
+  knitr::kable()
 ```
-In 2010, 45 states were observed at 7 or more locations. 
 
+In 2002, 36 states were observed at 7 or more locations. In 2010, 45 states were observed at 7 or more locations. 
 
-Create datafrome [excellent_df]
+Now we construct a dataset that is limited to "excellent" responses and contains, year, state, and data value average across locations within a state. 
+
 ```{r}
 excellent_df = 
   brfss_df |>
@@ -130,15 +134,20 @@ excellent_df =
   distinct()
 ```
 
-Make spagetti plot of [excellent_df]
+Here is a spagetti plot of average data values over time within each state. 
+
 ```{r}
 excellent_df |> 
   ggplot(aes(x = year, y = mean_data_value, color = state)) + 
   geom_line() +
-  labs(title = "Mean Data Values for Excellent Overall Health")
+  labs(title = "Mean Data Values for Excellent Overall Health", 
+        x = "Year",
+        y = "Mean Data Value")
 ```
 
-The spagetti plot shows the mean data values for excellent overall health in each state from 2022 to 2010. 
+The spagetti plot shows the mean data values for excellent overall health in each state from 2022 to 2010. The mean data values during this time period range primarily between 15 and 30. 
+
+Now we make a two-panel plot showing, for the years 2006, and 2010, the distribution of data values for responses (“Poor” to “Excellent”) among locations in NY State
 
 ```{r}
 nyc_df =
@@ -150,16 +159,19 @@ nyc_df |>
   ggplot(aes(x=response, y=data_value)) +
   geom_point() +
   facet_grid(. ~ year) + 
-  labs(title = "NY State Overall Health")
+  labs(title = "NY State Overall Health", 
+        x = "Response",
+        y = "Data Value")
 ```
 
-The 2-panel plot shows the distribution of data values for each reponse from "poor" to "excellent" in NY state countries in the year 2006 and 2010. 
+The 2-panel plot shows the distribution of data values for each reponse from "poor" to "excellent" in NY state countries in the year 2006 and 2010. In both 2006 and 2010, the data values increase overall from "poor" to "good"/"very good" health. However, the data values decrease overall from "very good health" to "excellent health.". 
 
 
 
 ## PROBLEM 3
 
-Clean demographic data
+First, we load and tidy NHANES demographic data. 
+
 ```{r import_demographic}
 demographic_df = 
   read_csv("./data/nhanes_covar.csv", skip = 4, na = ".") |> 
@@ -179,7 +191,8 @@ demographic_df =
   drop_na()
 ```
 
-Clean accelorometer data
+Next, we load and tidy NHANEs accelorometer data.
+
 ```{r}
 accelorometer_df = 
   read_csv("./data/nhanes_accel.csv") |> 
@@ -192,14 +205,15 @@ accelorometer_df =
   ) 
 ```
 
-Merge demographic and accelorometer data 
+Now, we merge the tidied demographic and accelorometer data . 
 ```{r}
 nhanes_df = 
   inner_join(demographic_df, accelorometer_df)
 ```
 
 
-Education table 
+Here is a table of the number of men and women in each education category. 
+
 ```{r}
 demographic_df |> 
   group_by(education, sex) |> 
@@ -211,15 +225,25 @@ demographic_df |>
   knitr::kable()
 ```
 
-Age distribution by sex
+The table shows that there is roughly the same number of females and males in the study with less than a high school education. There are more males than females with a high school equivalent education. There are slightly more females than males with more than a high school education. 
+
+
+Here is a visualization of the age distributions for men and women in each education category. 
+
 ```{r}
 demographic_df |> 
   ggplot(aes(x = education, y = age, color = sex)) + 
   geom_boxplot() +
-  labs(title = "Age Distribution")
+  labs(title = "Age Distribution", 
+        x = "Education Level",
+        y = "Age")
 ```
 
-Total Activity
+The boxplot shows the min, max, Q1, Q3, and median ages of males and females for each level of education. Females with less than a high school education have a higher median age than males with less than a high school education. Females with a high school equivalent education have a higher median age than males with a high school equivalent education. Females with more than a high school education have a slightly lower median age than males with more than a high school education. The plot demonstrates that the median age is lowest for males and females with more than a high school education. The median age is roughly the same for females with less than a high school education and a high school equivalent education, as well as males with less than a high school education and a high school equivalent education. 
+
+
+Next, we create a plot to represent total activity. 
+
 ```{r}
 nhanes_df |> 
   group_by(seqn, age, sex, education) |> 
@@ -228,10 +252,16 @@ nhanes_df |>
   geom_point() +
   geom_smooth() +
   facet_grid(. ~ education) + 
-  labs(title = "Total Activity")
+  labs(title = "Total Activity", 
+        x = "Age",
+        y = "Total Activity (mims)")
 ```
 
-Activity over the course of day
+The plot above shows that total activity decreases as age increases for males and females of all education levels. For participants with less than a high school education, total activity is generally higher for females until around age 50, at which total activity becomes higher for males. For participants with a high school equivalent and more than high school education, total activity is generally higher for females across all ages. 
+
+
+Finally, we create a plot to represent activity over the course of day. 
+
 ```{r}
 nhanes_df |>
   mutate(
@@ -240,6 +270,9 @@ nhanes_df |>
   ggplot(aes(x = minute, y = mims, color = sex)) + 
   geom_point(alpha = 0.5) +
   facet_grid(. ~ education) + 
-  labs(title = "Activity Over the Course of a Day")
+  labs(title = "Activity Over the Course of a Day", 
+        x = "Minute of the Day",
+        y = "Activity (mims)")
 ```
 
+The plot above demonstrates that across all education levels and sex, activity peaks around minute 500 (presumably when participants wake up) and decreases throughout the day. Activity is lowest right before minute (presumably when participants sleep). Activity over the course of a day is roughly the same for males and females with less than a high school and high school equivalent education. For participants with more than a high school education, activity is noticeably higher around minute 500, particularly for females, and activity is noticeably higher around minute 1250 for males only. 
