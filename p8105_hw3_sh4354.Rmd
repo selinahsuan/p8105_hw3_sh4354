@@ -30,6 +30,8 @@ instacart |>
 
 There are 124 aisles. The most items are ordered form fresh vegetales aisle. 
 
+
+
 ## PROBLEM 2
 
 Load BRFSS dataset
@@ -39,20 +41,86 @@ data("brfss_smart2010")
 
 Clean dataset
 ```{r}
-brfss_smart2010 |> 
+brfss_df = 
+  brfss_smart2010 |> 
   janitor::clean_names() |> 
+  separate(locationdesc, into = c("state", "county"), " - ") |> 
+  select(-locationabbr) |> 
   filter(topic == "Overall Health") |> 
   arrange(response) |> 
   mutate(
     response = fct_relevel(response, c("Poor", "Fair", "Good", "Very good", "Excellent"))
   )
+
 ```
 
 
-Question 1
+States observed at 7 or more locations in 2022
+
+```{r}
+brfss_df |> 
+  filter(year == 2002) |> 
+  group_by(state) |> 
+  summarize(n_location = n()) |> 
+  filter(n_location >=7)
+```
+
+In 2002, 36 states were observed at 7 or more locations. 
+
+
+States observed at 7 or more locations in 2010
+
+```{r}
+brfss_df |> 
+  filter(year == 2010) |> 
+  group_by(state) |> 
+  summarize(n_location = n()) |> 
+  filter(n_location >=7)
+```
+In 2010, 45 states were observed at 7 or more locations. 
+
+
+Create datafrome [excellent_df]
+```{r}
+excellent_df = 
+  brfss_df |>
+  filter(response == "Excellent") |> 
+  group_by(year, state) |> 
+  mutate(mean_data_value = mean(data_value, na.rm = TRUE)) |> 
+  select (year, state, mean_data_value) |> 
+  distinct()
+```
+
+Make spagetti plot of [excellent_df]
+```{r}
+excellent_df |> 
+  ggplot(aes(x = year, y = mean_data_value, color = state)) + 
+  geom_line() +
+  labs(title = "Mean Data Values for Excellent Overall Health")
+```
+
+The spagetti plot shows the mean data values for excellent overall health in each state from 2022 to 2010. 
+
+```{r}
+nyc_df =
+  brfss_df |>
+  filter((year == 2006 | year == 2010) & state == "NY") |>
+  select(year, response, data_value, county)
+  
+nyc_df |>
+  ggplot(aes(x=response, y=data_value)) +
+  geom_point() +
+  facet_grid(. ~ year) + 
+  labs(title = "NY State Overall Health")
+```
+
+The 2-panel plot shows the distribution of data values for each reponse from "poor" to "excellent" in NY state countries in the year 2006 and 2010. 
+
+
+
+## PROBLEM 3
 
 ```{r}
 
 ```
-
 
