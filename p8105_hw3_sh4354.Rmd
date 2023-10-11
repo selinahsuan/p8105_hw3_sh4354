@@ -144,32 +144,19 @@ Clean accelorometer data
 ```{r}
 accelorometer_df = 
   read_csv("./data/nhanes_accel.csv") |> 
-  janitor::clean_names()
+  janitor::clean_names() |> 
+  pivot_longer(
+    min1:min1440,
+    names_to = "minute",
+    names_prefix = "min",
+    values_to = "mims"
+  ) 
 ```
 
 Merge demographic and accelorometer data 
 ```{r}
-
-```
-
-Education table 
-```{r}
-demographic_df |> 
-  group_by(education, sex) |> 
-  summarize(n_sex = n()) |> 
-  pivot_wider(
-    names_from = sex,
-    values_from = n_sex
-  ) |> 
-  knitr::kable()
-```
-
-Age distribution by sex
-```{r}
-demographic_df |> 
-  ggplot(aes(x = education, y = age, color = sex)) + 
-  geom_boxplot() +
-  labs(title = "Age Distribution")
+nhanes_df = 
+  inner_join(demographic_df, accelorometer_df)
 ```
 
 
