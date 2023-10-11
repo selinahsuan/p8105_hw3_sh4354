@@ -160,3 +160,47 @@ nhanes_df =
 ```
 
 
+Education table 
+```{r}
+demographic_df |> 
+  group_by(education, sex) |> 
+  summarize(n_sex = n()) |> 
+  pivot_wider(
+    names_from = sex,
+    values_from = n_sex
+  ) |> 
+  knitr::kable()
+```
+
+Age distribution by sex
+```{r}
+demographic_df |> 
+  ggplot(aes(x = education, y = age, color = sex)) + 
+  geom_boxplot() +
+  labs(title = "Age Distribution")
+```
+
+Total Activity
+```{r}
+nhanes_df |> 
+  group_by(seqn, age, sex, education) |> 
+  summarize(total_activity = sum(mims)) |> 
+  ggplot(aes(x = age, y = total_activity, color = sex)) + 
+  geom_point() +
+  geom_smooth() +
+  facet_grid(. ~ education) + 
+  labs(title = "Total Activity")
+```
+
+Activity over the course of day
+```{r}
+nhanes_df |>
+  mutate(
+    minute = as.numeric(minute)
+  ) |> 
+  ggplot(aes(x = minute, y = mims, color = sex)) + 
+  geom_point(alpha = 0.5) +
+  facet_grid(. ~ education) + 
+  labs(title = "Activity Over the Course of a Day")
+```
+
